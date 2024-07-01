@@ -1,0 +1,8 @@
+go-backend/.env
+go-backend/tmp
+
+nextjs-frontend/next-env.d.ts 
+nextjs-frontend/.next 
+nextjs-frontend/node_modules
+nextjs-frontend/build 
+nextjs-frontend/.env*.local
