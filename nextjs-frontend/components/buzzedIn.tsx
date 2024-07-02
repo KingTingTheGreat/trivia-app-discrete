@@ -5,7 +5,11 @@ import { WS } from "@/ip";
 const BuzzedIn = () => {
 	const [data, setData] = useState([]);
 	const [ws, setWs] = useState(new WebSocket(WS("buzzed-in")));
-	const buzzer = new Audio("/buzzer.mp3");
+	const [buzzer, setBuzzer] = useState<HTMLAudioElement | null>(null);
+
+	useEffect(() => {
+		setBuzzer(new Audio("/buzzer.mp3"));
+	}, []);
 
 	useEffect(() => {
 		ws.onopen = () => {
@@ -26,7 +30,7 @@ const BuzzedIn = () => {
 
 	useEffect(() => {
 		if (data.length > 0) {
-			buzzer.play();
+			buzzer?.play();
 		}
 	}, [data]);
 
