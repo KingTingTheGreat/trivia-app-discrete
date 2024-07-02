@@ -1,8 +1,10 @@
 go-backend/.env
 go-backend/tmp
+go-backend/go-backend.exe
 
 nextjs-frontend/next-env.d.ts 
 nextjs-frontend/.next 
 nextjs-frontend/node_modules
 nextjs-frontend/build 
 nextjs-frontend/.env*.local
+nextjs-frontend/ip.ts
