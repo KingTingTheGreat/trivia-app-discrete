@@ -47,7 +47,6 @@ func BuzzWs(c echo.Context) error {
 	shared.Lock.Unlock()
 
 	shared.LeaderboardChan <- true
-	shared.BuzzedInChan <- true
 
 	// read messages from the connection
 	for {
