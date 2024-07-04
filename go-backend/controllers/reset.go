@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
 	"go-backend/shared"
 	"time"
 
@@ -31,9 +33,52 @@ func ResetBuzzers() {
 		shared.PlayerData[key] = player
 	}
 	shared.Lock.Unlock()
+
+	shared.BuzzedInChan <- true
 }
 
 func Reset(c echo.Context) error {
+	bodyJson := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&bodyJson)
+	if err != nil {
+		fmt.Println("error parsing")
+		enrichedJson, err := json.Marshal(map[string]string{
+			"message": "Error parsing request body. Please try again",
+			"success": "false",
+		})
+		if err != nil {
+			return err
+		}
+		return c.JSONBlob(400, enrichedJson)
+	}
+
+	var pw string
+	var ok bool
+	if pw, ok = bodyJson["password"].(string); !ok {
+		fmt.Println("no password")
+		enrichedJson, err := json.Marshal(map[string]string{
+			"message": "No password provided",
+			"success": "false",
+		})
+		if err != nil {
+			return err
+		}
+		return c.JSONBlob(400, enrichedJson)
+	}
+
+	if pw != shared.Password {
+		fmt.Println("incorrect password")
+		enrichedJson, err := json.Marshal(map[string]string{
+			"message": "Incorrect password",
+			"success": "false",
+		})
+		if err != nil {
+			return err
+		}
+		return c.JSONBlob(400, enrichedJson)
+	}
+
 	ResetBuzzers()
+
 	return c.JSONBlob(200, []byte(`{"success", "true"}`))
 }

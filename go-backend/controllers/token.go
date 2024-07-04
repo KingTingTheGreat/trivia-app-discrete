@@ -5,6 +5,7 @@ import (
 	"go-backend/shared"
 	"go-backend/types"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -47,6 +48,7 @@ func PostToken(c echo.Context) error {
 		}
 		return c.JSONBlob(400, enrichedJson)
 	}
+	name = strings.TrimSpace(name)
 
 	shared.Lock.Lock()
 	if _, ok = shared.PlayerNames[name]; ok {
@@ -66,7 +68,7 @@ func PostToken(c echo.Context) error {
 		token = generateToken()
 	}
 
-	shared.PlayerNames[name] = true
+	shared.PlayerNames[name] = token
 	shared.PlayerData[token] = types.Player{
 		Name:             name,
 		Score:            0,
@@ -78,10 +80,14 @@ func PostToken(c echo.Context) error {
 	}
 	shared.Lock.Unlock()
 
+	shared.PlayerListChan <- true
+	shared.LeaderboardChan <- true
+
 	enrichedJson, err := json.Marshal(map[string]string{
 		"message": "Token generated successfully",
 		"success": "true",
 		"token":   token,
+		"name":    name,
 	})
 	if err != nil {
 		return err

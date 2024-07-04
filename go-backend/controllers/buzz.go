@@ -14,11 +14,13 @@ func BuzzWs(c echo.Context) error {
 	// upgrade the connection to a websocket connection
 	conn, err := shared.Upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
+		fmt.Println("error upgrading")
 		return err
 	}
 	// read the token from the connection
 	_, tokenByte, err := conn.ReadMessage()
 	if err != nil {
+		fmt.Println("error reading message")
 		return err
 	}
 	token := string(tokenByte)

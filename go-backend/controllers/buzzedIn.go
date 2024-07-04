@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"go-backend/shared"
 	"go-backend/types"
 	"sort"
@@ -27,9 +28,8 @@ func BuzzedIn(c echo.Context) error {
 
 	buzzedInLock.Lock()
 	buzzedInConnections[conn] = true
-	buzzedInLock.Unlock()
-
 	conn.WriteJSON(makeBuzzedIn())
+	buzzedInLock.Unlock()
 
 	for {
 		_, _, err := conn.ReadMessage()
@@ -78,9 +78,11 @@ func makeBuzzedIn() [][]string {
 
 func BroadcastBuzzedIn() {
 	for range shared.BuzzedInChan {
+		buzzedIn := makeBuzzedIn()
+		fmt.Println(("broadcasting buzzed in"))
 		buzzedInLock.Lock()
 		for conn := range buzzedInConnections {
-			go conn.WriteJSON(makeBuzzedIn())
+			go conn.WriteJSON(buzzedIn)
 		}
 		buzzedInLock.Unlock()
 	}

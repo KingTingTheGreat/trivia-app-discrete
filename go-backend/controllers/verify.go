@@ -5,6 +5,7 @@ import (
 	"go-backend/shared"
 	"go-backend/types"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -34,6 +35,7 @@ func PostVerify(c echo.Context) error {
 	if name, ok = bodyJson["name"].(string); !ok {
 		return c.JSON(400, "No name provided")
 	}
+	name = strings.TrimSpace(name)
 
 	var player types.Player
 	shared.Lock.RLock()
@@ -54,5 +56,6 @@ func PostVerify(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
 	return c.JSONBlob(200, enrichedJson)
 }

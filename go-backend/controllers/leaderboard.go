@@ -28,9 +28,8 @@ func Leaderboard(c echo.Context) error {
 
 	leaderboardLock.Lock()
 	leaderboardConnections[conn] = true
-	leaderboardLock.Unlock()
-
 	conn.WriteJSON(makeLeaderboard())
+	leaderboardLock.Unlock()
 
 	for {
 		_, _, err := conn.ReadMessage()
@@ -75,9 +74,10 @@ func makeLeaderboard() [][]string {
 
 func BroadcastLeaderboard() {
 	for range shared.LeaderboardChan {
+		leaderboard := makeLeaderboard()
 		leaderboardLock.Lock()
 		for conn := range leaderboardConnections {
-			go conn.WriteJSON(makeLeaderboard())
+			go conn.WriteJSON(leaderboard)
 		}
 		leaderboardLock.Unlock()
 	}
