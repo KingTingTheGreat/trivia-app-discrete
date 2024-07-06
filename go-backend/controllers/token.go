@@ -12,7 +12,7 @@ import (
 )
 
 func generateToken() string {
-	var chars = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*_+-=<>?[]")
+	var chars = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*_+-=<>?")
 	var token string
 	for i := 0; i < 64; i++ {
 		token += string(chars[rand.Intn(len(chars))])

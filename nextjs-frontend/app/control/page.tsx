@@ -2,13 +2,19 @@
 import { useState, useEffect } from "react";
 import Leaderboard from "@/components/leaderboard";
 import { HTTP, WS } from "@/ip";
+import { defaultError } from "../page";
 
 export default function ControlPage() {
   const [password, setPassword] = useState("");
-  const [pwError, setPwError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(defaultError);
   const [qnum, setQnum] = useState(0);
   const [players, setPlayers] = useState<string[]>([]);
-  const [amount, setAmount] = useState(0);
+  const [playerTokens, setPlayerTokens] = useState<{ [name: string]: string }>(
+    {}
+  );
+  const [amount, setAmount] = useState("0");
+  const [name, setName] = useState("");
+  const [token, setToken] = useState("");
   const [ws, setWs] = useState(new WebSocket(WS("players")));
 
   // create websocket
@@ -17,13 +23,22 @@ export default function ControlPage() {
       console.log("connected to players");
     };
     ws.onmessage = (e) => {
-      console.log("players");
-      console.log(e.data);
-      setPlayers(JSON.parse(e.data));
+      console.log("players", e.data);
+      const playersList = JSON.parse(e.data) || [];
+      setPlayers(playersList);
+
+      const playerTokens: { [name: string]: string } = {};
+      for (const playerData of playersList) {
+        playerTokens[playerData[0]] = playerData[1];
+      }
+      setPlayerTokens(playerTokens);
     };
     ws.onclose = () => {
       console.log("disconnected from players");
-      setPlayers([])
+      setPlayers([]);
+      setAmount("0");
+      setName("");
+      setToken("");
       // try to reconnect
       setTimeout(() => {
         setWs(new WebSocket(WS("players")));
@@ -33,6 +48,8 @@ export default function ControlPage() {
 
   return (
     <main className="flex flex-col items-center p-2">
+      <p>{name}</p>
+      <p>{token}</p>
       <h1>Control Panel</h1>
       <div>
         <h4>Password</h4>
@@ -41,58 +58,80 @@ export default function ControlPage() {
           type="password"
           placeholder="Password"
           onChange={(e) => {
-            setPwError(false);
+            setErrorMessage(defaultError);
             setPassword(e.target.value);
           }}
         />
         <p
           className="text-md text-center"
           style={{
-            visibility: pwError ? "visible" : "hidden",
+            visibility: errorMessage !== defaultError ? "visible" : "hidden",
             color: "red",
           }}
         >
-          Invalid Password
+          {errorMessage}
         </p>
       </div>
       <h4 className="p-2 m-1">
-        Question #<span id="qnum"></span>
+        Question #<span id="qnum">1</span>
       </h4>
       <div className="flex flex-col sm:flex-row">
         <div className="flex flex-col m-2 p-3">
           <h4>Update User Score</h4>
           <select
             className="border-2 border-black p-1"
-            onChange={() => setAmount(0)}
+            value={name}
+            onChange={(e) => {
+              console.log(playerTokens);
+              const name = e.target.value;
+              setName(name);
+              setToken(playerTokens[name]);
+              setAmount("0");
+              setErrorMessage(defaultError);
+            }}
           >
+            <option></option>
             {players &&
-              players.map((player) => (
-                <option key={player[0]} value={player[0]}>
-                  {player[0]}
-                </option>
-              ))}
+              players.map((player) => {
+                return (
+                  <option key={player[0]} value={player[0]}>
+                    {player[0]}
+                  </option>
+                );
+              })}
           </select>
           <input
             className="border-2 border-black p-1"
             type="number"
             placeholder="Amount"
             value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
+            id="amount"
+            onChange={(e) => setAmount(e.target.value)}
           />
           <button
-            onClick={() =>
+            onClick={() => {
+              console.log(name, token);
               fetch(HTTP("player"), {
                 method: "PUT",
-                body: JSON.stringify({ password, amount }),
+                body: JSON.stringify({
+                  password,
+                  amount,
+                  token,
+                  name,
+                }),
               })
                 .then((res) => res.json())
                 .then((data) => {
                   if (data.success == "false") {
-                    setPwError(true);
+                    setErrorMessage(data.message);
+                  } else {
+                    setAmount("0");
+                    setToken("");
+                    setName("");
                   }
                 })
-                .catch((err) => setPwError(err))
-            }
+                .catch((err) => console.error(err));
+            }}
           >
             Update Score
           </button>
@@ -151,7 +190,18 @@ export default function ControlPage() {
             fetch(HTTP("player"), {
               method: "DELETE",
               body: JSON.stringify({ password }),
-            }).catch((err) => console.error(err))
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.success == "false") {
+                  setErrorMessage(data.message);
+                } else {
+                  setAmount("0");
+                  setToken("");
+                  setName("");
+                }
+              })
+              .catch((err) => console.error(err))
           }
         >
           Remove Player

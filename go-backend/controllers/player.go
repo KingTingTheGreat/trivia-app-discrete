@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"go-backend/shared"
 	"go-backend/types"
 	"sort"
@@ -85,8 +84,6 @@ func UpdatePlayer(c echo.Context) error {
 		return c.JSONBlob(400, enrichedJson)
 	}
 
-	fmt.Println(bodyJson["amount"])
-
 	var pw string
 	var ok bool
 	if pw, ok = bodyJson["password"].(string); !ok {
@@ -111,21 +108,8 @@ func UpdatePlayer(c echo.Context) error {
 		return c.JSONBlob(400, enrichedJson)
 	}
 
-	var amount string
-	if amount, ok = bodyJson["amount"].(string); !ok {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No amount provided",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
-	}
-
 	var token string
 	if token, ok = bodyJson["token"].(string); !ok {
-		fmt.Println("No player selected")
 		enrichedJson, err := json.Marshal(map[string]string{
 			"message": "No player selected",
 			"success": "false",
@@ -137,9 +121,9 @@ func UpdatePlayer(c echo.Context) error {
 	}
 
 	shared.Lock.Lock()
+	defer shared.Lock.Unlock()
 	var player types.Player
 	if player, ok = shared.PlayerData[token]; !ok {
-		fmt.Println("Player not found")
 		enrichedJson, err := json.Marshal(map[string]string{
 			"message": "Player not found",
 			"success": "false",
@@ -150,13 +134,33 @@ func UpdatePlayer(c echo.Context) error {
 		return c.JSONBlob(400, enrichedJson)
 	}
 
-	amt, err := strconv.Atoi(amount)
-	if err != nil {
-		fmt.Println("Invalid amount")
+	var amountStr string
+	if amountStr, ok = bodyJson["amount"].(string); !ok {
+		enrichedJson, err := json.Marshal(map[string]string{
+			"message": "No amount provided",
+			"success": "false",
+		})
+		if err != nil {
+			return err
+		}
+		return c.JSONBlob(400, enrichedJson)
 	}
-	player.Score += amt
+	amount, err := strconv.ParseInt(amountStr, 10, 64)
+	if err != nil {
+		enrichedJson, err := json.Marshal(map[string]string{
+			"message": "Error parsing amount",
+			"success": "false",
+		})
+		if err != nil {
+			return err
+		}
+		return c.JSONBlob(400, enrichedJson)
+	}
+
+	player.Score += int(amount)
 	shared.PlayerData[token] = player
-	shared.Lock.Unlock()
+
+	shared.LeaderboardChan <- true
 
 	return nil
 }

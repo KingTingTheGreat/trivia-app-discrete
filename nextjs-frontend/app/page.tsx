@@ -4,7 +4,7 @@ import { useUserContext } from "@/context/UserContext";
 import { useState } from "react";
 import { HTTP } from "@/ip";
 
-const defaultError = "Error message";
+export const defaultError = "Error message";
 
 export default function HomePage() {
   const userContext = useUserContext();
@@ -13,7 +13,7 @@ export default function HomePage() {
   const [errorMessage, setErrorMessage] = useState<string>(defaultError);
 
   const handleSubmit = async () => {
-    await fetch(HTTP("token"), {
+    fetch(HTTP("token"), {
       method: "POST",
       body: JSON.stringify({ name: name.trim() }),
     })

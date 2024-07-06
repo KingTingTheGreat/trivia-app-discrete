@@ -16,12 +16,12 @@ const BuzzedIn = () => {
       console.log("connected to buzzed in");
     };
     ws.onmessage = (e) => {
-      console.log(e.data);
+      console.log("buzzed in", e.data);
       setData(JSON.parse(e.data));
     };
     ws.onclose = () => {
       console.log("disconnected from buzzed in");
-      setData([])
+      setData([]);
       // try to reconnect
       setTimeout(() => {
         setWs(new WebSocket(WS("buzzed-in")));

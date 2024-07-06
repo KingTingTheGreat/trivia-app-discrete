@@ -11,13 +11,12 @@ const Leaderboard = () => {
       console.log("connected to leaderboard");
     };
     ws.onmessage = (e) => {
-      console.log("leaderboard");
-      console.log(e.data);
+      console.log("leaderboard", e.data);
       setData(JSON.parse(e.data));
     };
     ws.onclose = () => {
       console.log("disconnected from leaderboard");
-      setData([])
+      setData([]);
       // try to reconnect
       setTimeout(() => {
         setWs(new WebSocket(WS("leaderboard")));
