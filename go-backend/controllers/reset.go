@@ -54,7 +54,7 @@ func Reset(c echo.Context) error {
 
 	var pw string
 	var ok bool
-	if pw, ok = bodyJson["password"].(string); !ok {
+	if pw, ok = bodyJson["password"].(string); !ok || len(pw) == 0 {
 		fmt.Println("no password")
 		enrichedJson, err := json.Marshal(map[string]string{
 			"message": "No password provided",
@@ -80,5 +80,12 @@ func Reset(c echo.Context) error {
 
 	ResetBuzzers()
 
-	return c.JSONBlob(200, []byte(`{"success", "true"}`))
+	enrichedJson, err := json.Marshal(map[string]string{
+		"success": "true",
+	})
+	if err != nil {
+		return err
+	}
+
+	return c.JSONBlob(200, enrichedJson)
 }

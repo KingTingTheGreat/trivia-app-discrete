@@ -35,4 +35,8 @@ func LoadPassword() {
 		panic("Error loading .env file")
 	}
 	Password = os.Getenv("PASSWORD")
+
+	if Password == "" {
+		panic("No password found in .env file")
+	}
 }

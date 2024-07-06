@@ -124,9 +124,6 @@ export default function ControlPage() {
                 .then((data) => {
                   if (data.success == "false") {
                     setErrorMessage(data.message);
-                  } else {
-                    setAmount("0");
-                    setToken("");
                     setName("");
                   }
                 })
@@ -163,6 +160,13 @@ export default function ControlPage() {
                 method: "POST",
                 body: JSON.stringify({ password }),
               })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.success == "false") {
+                    setErrorMessage(data.message);
+                  }
+                })
+                .catch((err) => console.error(err))
             }
           >
             Reset Buzzers
@@ -195,9 +199,6 @@ export default function ControlPage() {
               .then((data) => {
                 if (data.success == "false") {
                   setErrorMessage(data.message);
-                } else {
-                  setAmount("0");
-                  setToken("");
                   setName("");
                 }
               })
