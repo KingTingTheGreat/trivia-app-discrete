@@ -109,9 +109,21 @@ func UpdatePlayer(c echo.Context) error {
 	}
 
 	var token string
-	if token, ok = bodyJson["token"].(string); !ok {
+	if token, ok = bodyJson["token"].(string); !ok || len(token) != 64 {
 		enrichedJson, err := json.Marshal(map[string]string{
 			"message": "No player selected",
+			"success": "false",
+		})
+		if err != nil {
+			return err
+		}
+		return c.JSONBlob(400, enrichedJson)
+	}
+
+	var name string
+	if name, ok = bodyJson["name"].(string); !ok || len(name) == 0 {
+		enrichedJson, err := json.Marshal(map[string]string{
+			"message": "No player name selected",
 			"success": "false",
 		})
 		if err != nil {
@@ -123,7 +135,7 @@ func UpdatePlayer(c echo.Context) error {
 	shared.Lock.Lock()
 	defer shared.Lock.Unlock()
 	var player types.Player
-	if player, ok = shared.PlayerData[token]; !ok {
+	if player, ok = shared.PlayerData[token]; !ok || player.Name != name {
 		enrichedJson, err := json.Marshal(map[string]string{
 			"message": "Player not found",
 			"success": "false",
@@ -162,7 +174,15 @@ func UpdatePlayer(c echo.Context) error {
 
 	shared.LeaderboardChan <- true
 
-	return nil
+	enrichedJson, err := json.Marshal(map[string]string{
+		"message": "Player score updated",
+		"success": "true",
+	})
+	if err != nil {
+		return err
+	}
+
+	return c.JSONBlob(200, enrichedJson)
 }
 
 func DeletePlayer(c echo.Context) error {
