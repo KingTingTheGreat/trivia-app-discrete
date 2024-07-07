@@ -3,14 +3,13 @@ import { useRouter } from "next/navigation";
 import { UserContextType, useUserContext } from "@/context/UserContext";
 import { useState } from "react";
 import { HTTP } from "@/ip";
-
-export const defaultError = "Error message";
+import { DEFAULT_ERROR } from "@/constants";
 
 export default function HomePage() {
   const userContext = useUserContext();
   const { name, token } = userContext.state;
   const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState<string>(defaultError);
+  const [errorMessage, setErrorMessage] = useState<string>(DEFAULT_ERROR);
 
   const handleSubmit = async () => {
     fetch(HTTP("token"), {
@@ -57,7 +56,7 @@ export default function HomePage() {
           className="p-4 m-2 border-2 border-black rounded-lg"
           onChange={(e) => {
             userContext.setState((prev) => ({ ...prev, name: e.target.value }));
-            setErrorMessage(defaultError);
+            setErrorMessage(DEFAULT_ERROR);
           }}
           value={name}
         />
@@ -72,7 +71,7 @@ export default function HomePage() {
       </form>
       <p
         style={{
-          visibility: errorMessage !== defaultError ? "visible" : "hidden",
+          visibility: errorMessage !== DEFAULT_ERROR ? "visible" : "hidden",
           color: "red",
         }}
       >

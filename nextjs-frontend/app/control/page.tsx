@@ -2,11 +2,11 @@
 import { useState, useEffect } from "react";
 import Leaderboard from "@/components/leaderboard";
 import { HTTP, WS } from "@/ip";
-import { defaultError } from "../page";
+import { DEFAULT_ERROR } from "@/constants";
 
 export default function ControlPage() {
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState(defaultError);
+  const [errorMessage, setErrorMessage] = useState(DEFAULT_ERROR);
   const [qnum, setQnum] = useState(0);
   const [players, setPlayers] = useState<string[]>([]);
   const [playerTokens, setPlayerTokens] = useState<{ [name: string]: string }>(
@@ -58,14 +58,14 @@ export default function ControlPage() {
           type="password"
           placeholder="Password"
           onChange={(e) => {
-            setErrorMessage(defaultError);
+            setErrorMessage(DEFAULT_ERROR);
             setPassword(e.target.value);
           }}
         />
         <p
           className="text-md text-center"
           style={{
-            visibility: errorMessage !== defaultError ? "visible" : "hidden",
+            visibility: errorMessage !== DEFAULT_ERROR ? "visible" : "hidden",
             color: "red",
           }}
         >
@@ -87,7 +87,7 @@ export default function ControlPage() {
               setName(name);
               setToken(playerTokens[name]);
               setAmount("0");
-              setErrorMessage(defaultError);
+              setErrorMessage(DEFAULT_ERROR);
             }}
           >
             <option></option>
