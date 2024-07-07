@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"go-backend/shared"
 	"go-backend/types"
+	"go-backend/util"
 	"sort"
 	"strconv"
 	"sync"
@@ -74,99 +75,43 @@ func UpdatePlayer(c echo.Context) error {
 	bodyJson := make(map[string]interface{})
 	err := json.NewDecoder(c.Request().Body).Decode(&bodyJson)
 	if err != nil {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Error parsing request body. Please try again",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.JsonParsingError(c)
 	}
 
 	var pw string
 	var ok bool
 	if pw, ok = bodyJson["password"].(string); !ok {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No password provided",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "No password provided")
 	}
 
 	if pw != shared.Password {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Incorrect password",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "Incorrect password")
 	}
 
 	var token string
 	if token, ok = bodyJson["token"].(string); !ok || len(token) != 64 {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No player selected",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "No player selected")
 	}
 
 	var name string
 	if name, ok = bodyJson["name"].(string); !ok || len(name) == 0 {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No player name selected",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "No player name selected")
 	}
 
 	shared.Lock.Lock()
 	defer shared.Lock.Unlock()
 	var player types.Player
 	if player, ok = shared.PlayerData[token]; !ok || player.Name != name {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Player not found",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "Player not found")
 	}
 
 	var amountStr string
 	if amountStr, ok = bodyJson["amount"].(string); !ok {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No amount provided",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "No amount provided")
 	}
 	amount, err := strconv.ParseInt(amountStr, 10, 64)
 	if err != nil {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Error parsing amount",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "Error parsing amount")
 	}
 
 	player.Score += int(amount)
@@ -189,63 +134,28 @@ func DeletePlayer(c echo.Context) error {
 	bodyJson := make(map[string]interface{})
 	err := json.NewDecoder(c.Request().Body).Decode(&bodyJson)
 	if err != nil {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Error parsing request body. Please try again",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.JsonParsingError(c)
 	}
 
 	var pw string
 	var ok bool
 	if pw, ok = bodyJson["password"].(string); !ok {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No password provided",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "No password provided")
 	}
 
 	if pw != shared.Password {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Incorrect password",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "Incorrect password")
 	}
 
 	var token string
 	if token, ok = bodyJson["token"].(string); !ok {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No player selected",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "No player selected")
 	}
 
 	shared.Lock.Lock()
 	var player types.Player
 	if player, ok = shared.PlayerData[token]; !ok {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Player not found",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "Player not found")
 	}
 
 	delete(shared.PlayerNames, player.Name)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-backend/shared"
 	"go-backend/types"
+	"go-backend/util"
 	"math/rand"
 	"strings"
 	"time"
@@ -27,27 +28,13 @@ func PostToken(c echo.Context) error {
 	bodyJson := make(map[string]interface{})
 	err := json.NewDecoder(c.Request().Body).Decode(&bodyJson)
 	if err != nil {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Error parsing request body. Please try again",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.JsonParsingError(c)
 	}
 	// check if the request body contains the correct key
 	var name string
 	var ok bool
 	if name, ok = bodyJson["name"].(string); !ok {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No name provided",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "No name provided")
 	}
 	name = strings.TrimSpace(name)
 
@@ -75,14 +62,7 @@ func PostToken(c echo.Context) error {
 	shared.Lock.Lock()
 	if _, ok = shared.PlayerNames[name]; ok {
 		shared.Lock.Unlock()
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "A player with this name already exists",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "A player with this name already exists")
 	}
 
 	if len(token) != 64 {

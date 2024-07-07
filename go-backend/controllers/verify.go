@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"go-backend/shared"
 	"go-backend/types"
+	"go-backend/util"
 	"strconv"
 	"strings"
 
@@ -16,14 +17,7 @@ func PostVerify(c echo.Context) error {
 	bodyJson := make(map[string]interface{})
 	err := json.NewDecoder(c.Request().Body).Decode(&bodyJson)
 	if err != nil {
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Error parsing request body. Please try again",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.JsonParsingError(c)
 	}
 	// check if the request body contains the correct key
 	var token string

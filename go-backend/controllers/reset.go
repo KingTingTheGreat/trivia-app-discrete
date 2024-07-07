@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-backend/shared"
+	"go-backend/util"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -42,40 +43,19 @@ func Reset(c echo.Context) error {
 	err := json.NewDecoder(c.Request().Body).Decode(&bodyJson)
 	if err != nil {
 		fmt.Println("error parsing")
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Error parsing request body. Please try again",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.JsonParsingError(c)
 	}
 
 	var pw string
 	var ok bool
 	if pw, ok = bodyJson["password"].(string); !ok || len(pw) == 0 {
 		fmt.Println("no password")
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "No password provided",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "No password provided")
 	}
 
 	if pw != shared.Password {
 		fmt.Println("incorrect password")
-		enrichedJson, err := json.Marshal(map[string]string{
-			"message": "Incorrect password",
-			"success": "false",
-		})
-		if err != nil {
-			return err
-		}
-		return c.JSONBlob(400, enrichedJson)
+		return util.UserInputError(c, "Incorrect password")
 	}
 
 	ResetBuzzers()
