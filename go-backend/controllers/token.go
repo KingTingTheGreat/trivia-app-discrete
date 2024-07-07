@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"go-backend/shared"
 	"go-backend/types"
 	"math/rand"
@@ -50,6 +51,27 @@ func PostToken(c echo.Context) error {
 	}
 	name = strings.TrimSpace(name)
 
+	fmt.Println(bodyJson)
+	var token string
+	if token, ok = bodyJson["token"].(string); ok && len(token) == 64 {
+		// check if this player and token already exist
+		shared.Lock.RLock()
+		if player, ok := shared.PlayerData[token]; ok && player.Name == name && shared.PlayerNames[name] == token {
+			shared.Lock.RUnlock()
+			enrichedJson, err := json.Marshal(map[string]string{
+				"message": "Successfully restored player",
+				"success": "true",
+				"token":   token,
+				"name":    name,
+			})
+			if err != nil {
+				return err
+			}
+			return c.JSONBlob(200, enrichedJson)
+		}
+		shared.Lock.RUnlock()
+	}
+
 	shared.Lock.Lock()
 	if _, ok = shared.PlayerNames[name]; ok {
 		shared.Lock.Unlock()
@@ -63,7 +85,9 @@ func PostToken(c echo.Context) error {
 		return c.JSONBlob(400, enrichedJson)
 	}
 
-	token := generateToken()
+	if len(token) != 64 {
+		token = generateToken()
+	}
 	for _, ok = shared.PlayerData[token]; ok; {
 		token = generateToken()
 	}

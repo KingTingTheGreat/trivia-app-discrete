@@ -39,11 +39,10 @@ func PostVerify(c echo.Context) error {
 
 	var player types.Player
 	shared.Lock.RLock()
+	defer shared.Lock.RUnlock()
 	if player, ok = shared.PlayerData[token]; !ok {
-		shared.Lock.RUnlock()
 		return c.JSON(400, "No player with this token exists")
 	}
-	shared.Lock.RUnlock()
 
 	if player.Name != name {
 		return c.JSON(400, "The name provided does not match the token")
