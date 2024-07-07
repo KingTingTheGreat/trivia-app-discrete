@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useUserContext } from "@/context/UserContext";
+import { UserContextType, useUserContext } from "@/context/UserContext";
 import { useState } from "react";
 import { HTTP } from "@/ip";
 
@@ -8,14 +8,17 @@ export const defaultError = "Error message";
 
 export default function HomePage() {
   const userContext = useUserContext();
-  const { name } = userContext.state;
+  const { name, token } = userContext.state;
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string>(defaultError);
 
   const handleSubmit = async () => {
     fetch(HTTP("token"), {
       method: "POST",
-      body: JSON.stringify({ name: name.trim() }),
+      body: JSON.stringify({
+        name: name.trim(),
+        token,
+      }),
     })
       .then((res) => res.json())
       .then((data) => {
