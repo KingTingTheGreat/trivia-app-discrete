@@ -1,13 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useUserContext } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 import { HTTP, WS } from "@/ip";
 
 export default function PlayerPage() {
   const userContext = useUserContext();
-  const { token, name } = userContext.state;
-  const [buttonReady, setButtonReady] = useState(false);
+  const { token, name, buttonReady } = userContext.state;
   const router = useRouter();
   const ws = new WebSocket(WS("buzz"));
 
@@ -26,7 +25,7 @@ export default function PlayerPage() {
         if (!data.success) {
           router.push("/");
         }
-        setButtonReady(data.buttonReady == "false");
+        userContext.set({ buttonReady: data.buttonReady == "false" });
       })
       .catch((err) => console.error(err));
   }, [token, name]);
@@ -39,7 +38,9 @@ export default function PlayerPage() {
     };
     ws.onmessage = (e) => {
       console.log(e.data);
-      setButtonReady(JSON.parse(e.data).buttonReady == "true");
+      userContext.set({
+        buttonReady: JSON.parse(e.data).buttonReady == "false",
+      });
       console.log(buttonReady);
     };
     ws.onclose = () => {
@@ -60,7 +61,7 @@ export default function PlayerPage() {
         onClick={() => {
           try {
             ws.send(name);
-            setButtonReady(false);
+            userContext.set({ buttonReady: false });
           } catch (e) {
             console.error(e);
           }

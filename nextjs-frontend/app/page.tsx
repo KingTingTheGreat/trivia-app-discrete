@@ -23,11 +23,10 @@ export default function HomePage() {
       .then((data) => {
         console.log(data);
         if (data.success == "true") {
-          userContext.setState((prev) => ({
-            ...prev,
+          userContext.set({
             name: data.name,
             token: data.token,
-          }));
+          });
           router.push("/player");
         } else {
           setErrorMessage(data.message);
@@ -55,7 +54,7 @@ export default function HomePage() {
           type="text"
           className="p-4 m-2 border-2 border-black rounded-lg"
           onChange={(e) => {
-            userContext.setState((prev) => ({ ...prev, name: e.target.value }));
+            userContext.set({ name: e.target.value });
             setErrorMessage(DEFAULT_ERROR);
           }}
           value={name}
