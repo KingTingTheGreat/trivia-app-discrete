@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"go-backend/shared"
-	"go-backend/types"
 	"sort"
 	"sync"
 
@@ -42,15 +41,7 @@ func BuzzedIn(c echo.Context) error {
 }
 
 func makeBuzzedIn() [][]string {
-	var playerList []types.Player
-
-	shared.Lock.RLock()
-	defer shared.Lock.RUnlock()
-
-	// get list of all players
-	for _, player := range shared.PlayerData {
-		playerList = append(playerList, player)
-	}
+	playerList := shared.PlayerStore.AllPlayers()
 
 	// sort the list by buzz in time, then score, then name
 	sort.Slice(playerList, func(i, j int) bool {

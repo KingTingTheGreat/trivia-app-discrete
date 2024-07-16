@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-backend/shared"
+	"go-backend/types"
 	"go-backend/util"
 	"time"
 
@@ -17,8 +18,9 @@ func ResetBuzzersLoop() {
 }
 
 func ResetBuzzers() {
-	shared.Lock.Lock()
-	for key, player := range shared.PlayerData {
+	for _, tokenPlayer := range shared.PlayerStore.AllTokenPlayers() {
+		token := tokenPlayer.Token
+		player := tokenPlayer.Player
 		player.ButtonReady = true
 		if player.Websocket == nil {
 			continue
@@ -31,9 +33,12 @@ func ResetBuzzers() {
 			player.Websocket = nil
 		}
 		player.BuzzedIn = time.Time{}
-		shared.PlayerData[key] = player
+		shared.PlayerStore.PutPlayer(token, types.UpdatePlayer{
+			ButtonReady: &player.ButtonReady,
+			BuzzedIn:    &player.BuzzedIn,
+			Websocket:   player.Websocket,
+		})
 	}
-	shared.Lock.Unlock()
 
 	shared.BuzzedInChan <- true
 }

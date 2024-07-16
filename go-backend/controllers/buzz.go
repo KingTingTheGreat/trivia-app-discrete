@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go-backend/shared"
+	"go-backend/types"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -27,26 +28,20 @@ func BuzzWs(c echo.Context) error {
 
 	// close the connection and remove websocket from player data
 	defer func(conn *websocket.Conn) {
-		shared.Lock.Lock()
-		player := shared.PlayerData[token]
-		player.Websocket = nil
-		shared.PlayerData[token] = player
+		shared.PlayerStore.PutPlayer(token, types.UpdatePlayer{Websocket: nil})
 		conn.Close()
-		shared.Lock.Unlock()
 	}(conn)
 
 	// check if the token is valid
-	if _, ok := shared.PlayerData[token]; !ok {
+	var player types.Player
+	var ok bool
+	if player, ok = shared.PlayerStore.GetPlayer(token); !ok {
 		// return error
 		return errors.New("invalid token")
 	}
 
 	// add the connection to the playerConnections map
-	shared.Lock.Lock()
-	player := shared.PlayerData[token]
-	player.Websocket = conn
-	shared.PlayerData[token] = player
-	shared.Lock.Unlock()
+	shared.PlayerStore.PutPlayer(token, types.UpdatePlayer{Websocket: conn})
 
 	shared.LeaderboardChan <- true
 
@@ -64,11 +59,10 @@ func BuzzWs(c echo.Context) error {
 		if err != nil {
 			break
 		}
+		// data race with store and player
 		if player.BuzzedIn.IsZero() {
-			shared.Lock.Lock()
 			player.BuzzedIn = time.Now()
-			shared.PlayerData[token] = player
-			shared.Lock.Unlock()
+			shared.PlayerStore.PutPlayer(token, types.UpdatePlayer{BuzzedIn: &player.BuzzedIn})
 			shared.BuzzedInChan <- true
 		}
 	}

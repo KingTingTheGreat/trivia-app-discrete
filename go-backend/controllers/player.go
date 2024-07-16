@@ -5,7 +5,6 @@ import (
 	"go-backend/shared"
 	"go-backend/types"
 	"go-backend/util"
-	"sort"
 	"strconv"
 	"sync"
 
@@ -30,7 +29,7 @@ func GetPlayers(c echo.Context) error {
 
 	playerListLock.Lock()
 	playerListConnections[conn] = true
-	conn.WriteJSON(makePlayerList())
+	conn.WriteJSON(shared.PlayerStore.AllNamesTokens())
 	playerListLock.Unlock()
 
 	for {
@@ -43,26 +42,9 @@ func GetPlayers(c echo.Context) error {
 	return nil
 }
 
-func makePlayerList() [][]string {
-	var players [][]string
-
-	shared.Lock.RLock()
-	defer shared.Lock.RUnlock()
-
-	for playerName, token := range shared.PlayerNames {
-		players = append(players, []string{playerName, token})
-	}
-
-	sort.Slice(players, func(i, j int) bool {
-		return players[i][0] < players[j][0]
-	})
-
-	return players
-}
-
 func BroadcastPlayerList() {
 	for range shared.PlayerListChan {
-		playerList := makePlayerList()
+		playerList := shared.PlayerStore.AllNamesTokens()
 		playerListLock.Lock()
 		for conn := range playerListConnections {
 			go conn.WriteJSON(playerList)
@@ -98,13 +80,6 @@ func UpdatePlayer(c echo.Context) error {
 		return util.UserInputError(c, "No player name selected")
 	}
 
-	shared.Lock.Lock()
-	defer shared.Lock.Unlock()
-	var player types.Player
-	if player, ok = shared.PlayerData[token]; !ok || player.Name != name {
-		return util.UserInputError(c, "Player not found")
-	}
-
 	var amountStr string
 	if amountStr, ok = bodyJson["amount"].(string); !ok {
 		return util.UserInputError(c, "No amount provided")
@@ -114,8 +89,11 @@ func UpdatePlayer(c echo.Context) error {
 		return util.UserInputError(c, "Error parsing amount")
 	}
 
-	player.Score += int(amount)
-	shared.PlayerData[token] = player
+	scoreDiff := int(amount)
+	err = shared.PlayerStore.PutPlayer(token, types.UpdatePlayer{ScoreDiff: &scoreDiff})
+	if err != nil {
+		return util.UserInputError(c, err.Error())
+	}
 
 	shared.LeaderboardChan <- true
 
@@ -152,15 +130,11 @@ func DeletePlayer(c echo.Context) error {
 		return util.UserInputError(c, "No player selected")
 	}
 
-	shared.Lock.Lock()
-	var player types.Player
-	if player, ok = shared.PlayerData[token]; !ok {
+	if _, ok = shared.PlayerStore.GetPlayer(token); !ok {
 		return util.UserInputError(c, "Player not found")
 	}
 
-	delete(shared.PlayerNames, player.Name)
-	delete(shared.PlayerData, token)
-	shared.Lock.Unlock()
+	shared.PlayerStore.DeletePlayer(token)
 
 	shared.PlayerListChan <- true
 

@@ -6,21 +6,11 @@ import (
 	"go-backend/shared"
 	"go-backend/types"
 	"go-backend/util"
-	"math/rand"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 )
-
-func generateToken() string {
-	var chars = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*_+-=<>?")
-	var token string
-	for i := 0; i < 64; i++ {
-		token += string(chars[rand.Intn(len(chars))])
-	}
-	return token
-}
 
 // returns a new token for a player
 func PostToken(c echo.Context) error {
@@ -42,9 +32,7 @@ func PostToken(c echo.Context) error {
 	var token string
 	if token, ok = bodyJson["token"].(string); ok && len(token) == 64 {
 		// check if this player and token already exist
-		shared.Lock.RLock()
-		if player, ok := shared.PlayerData[token]; ok && player.Name == name && shared.PlayerNames[name] == token {
-			shared.Lock.RUnlock()
+		if player, ok := shared.PlayerStore.GetPlayer(token); ok && player.Name == name {
 			enrichedJson, err := json.Marshal(map[string]string{
 				"message": "Successfully restored player",
 				"success": "true",
@@ -56,24 +44,9 @@ func PostToken(c echo.Context) error {
 			}
 			return c.JSONBlob(200, enrichedJson)
 		}
-		shared.Lock.RUnlock()
 	}
 
-	shared.Lock.Lock()
-	if _, ok = shared.PlayerNames[name]; ok {
-		shared.Lock.Unlock()
-		return util.UserInputError(c, "A player with this name already exists")
-	}
-
-	if len(token) != 64 {
-		token = generateToken()
-	}
-	for _, ok = shared.PlayerData[token]; ok; {
-		token = generateToken()
-	}
-
-	shared.PlayerNames[name] = token
-	shared.PlayerData[token] = types.Player{
+	token, err = shared.PlayerStore.PostPlayer(types.Player{
 		Name:             name,
 		Score:            0,
 		ButtonReady:      false,
@@ -81,8 +54,10 @@ func PostToken(c echo.Context) error {
 		LastUpdate:       time.Now(),
 		BuzzedIn:         time.Time{},
 		Websocket:        nil,
+	})
+	if err != nil {
+		util.UserInputError(c, err.Error())
 	}
-	shared.Lock.Unlock()
 
 	shared.PlayerListChan <- true
 	shared.LeaderboardChan <- true

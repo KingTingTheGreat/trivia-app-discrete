@@ -15,3 +15,12 @@ type Player struct {
 	BuzzedIn         time.Time
 	Websocket        *websocket.Conn
 }
+
+type UpdatePlayer struct {
+	Name        *string
+	ScoreDiff   *int
+	ButtonReady *bool
+	LastUpdate  *time.Time
+	BuzzedIn    *time.Time
+	Websocket   *websocket.Conn
+}

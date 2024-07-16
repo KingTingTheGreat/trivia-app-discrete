@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"go-backend/shared"
-	"go-backend/types"
 	"go-backend/util"
 	"strconv"
 	"strings"
@@ -31,16 +30,11 @@ func PostVerify(c echo.Context) error {
 	}
 	name = strings.TrimSpace(name)
 
-	var player types.Player
-	shared.Lock.RLock()
-	defer shared.Lock.RUnlock()
-	if player, ok = shared.PlayerData[token]; !ok {
-		return c.JSON(400, "No player with this token exists")
+	if !shared.PlayerStore.VerifyTokenName(token, name) {
+		return c.JSON(400, "The token and name provided do not match")
 	}
 
-	if player.Name != name {
-		return c.JSON(400, "The name provided does not match the token")
-	}
+	player, _ := shared.PlayerStore.GetPlayer(token)
 
 	enrichedJson, err := json.Marshal(map[string]string{
 		"success":     "true",
