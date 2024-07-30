@@ -1,1 +1,0 @@
-./init-backend & ./init-frontend
