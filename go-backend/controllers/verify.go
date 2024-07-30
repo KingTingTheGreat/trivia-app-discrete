@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"go-backend/shared"
 	"go-backend/util"
 	"strconv"
@@ -43,6 +44,8 @@ func PostVerify(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(player.ButtonReady)
 
 	return c.JSONBlob(200, enrichedJson)
 }

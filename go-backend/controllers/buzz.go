@@ -62,7 +62,8 @@ func BuzzWs(c echo.Context) error {
 		// data race with store and player
 		if player.BuzzedIn.IsZero() {
 			player.BuzzedIn = time.Now()
-			shared.PlayerStore.PutPlayer(token, types.UpdatePlayer{BuzzedIn: &player.BuzzedIn})
+			player.ButtonReady = false
+			shared.PlayerStore.PutPlayer(token, types.UpdatePlayer{BuzzedIn: &player.BuzzedIn, ButtonReady: &player.ButtonReady})
 			shared.BuzzedInChan <- true
 		}
 	}

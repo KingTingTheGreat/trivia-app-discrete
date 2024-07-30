@@ -49,7 +49,7 @@ func PostToken(c echo.Context) error {
 	token, err = shared.PlayerStore.PostPlayer(types.Player{
 		Name:             name,
 		Score:            0,
-		ButtonReady:      false,
+		ButtonReady:      true,
 		CorrectQuestions: make([]string, 0),
 		LastUpdate:       time.Now(),
 		BuzzedIn:         time.Time{},

@@ -25,7 +25,7 @@ export default function PlayerPage() {
         if (!data.success) {
           router.push("/");
         }
-        userContext.set({ buttonReady: data.buttonReady == "false" });
+        userContext.set({ buttonReady: data.buttonReady == "true" });
       })
       .catch((err) => console.error(err));
   }, [token, name]);
@@ -39,9 +39,8 @@ export default function PlayerPage() {
     ws.onmessage = (e) => {
       console.log(e.data);
       userContext.set({
-        buttonReady: JSON.parse(e.data).buttonReady == "false",
+        buttonReady: JSON.parse(e.data).buttonReady == "true",
       });
-      console.log(buttonReady);
     };
     ws.onclose = () => {
       console.log("disconnected");
