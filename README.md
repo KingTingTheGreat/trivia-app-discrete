@@ -8,18 +8,15 @@ A live buzzer to play trivia on your local network
 
 -   Install [Go version 1.22 or higher](https://go.dev/doc/install)
 -   Create a .env file with the path go-backend/.env and add a password; PASSWORD="yourpasswordhere"
--   Run "go mod download" in the go-backend directory
--   Run "go run main.go" to serve the application
 
 ### Frontend
 
 -   Install [Node.js](https://nodejs.org/en/download/)
--   Run "npm install" in the frontend directory
--   Edit the file nextjs-frontend/ip.ts to include your device's IP address
--   Run "npm run dev" in the frontend directory
--   The application is now accessible on your local network at your device's IP on port 3000!
+-   Edit the file nextjs-frontend/ip.ts to include your device's IP address on your local network
 
-## How to use
+## How to run
+
+-   Run the Makefile using the _make_ command
 
 ### Players
 
