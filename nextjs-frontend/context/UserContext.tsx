@@ -5,8 +5,7 @@ import {
   useContext,
   useState,
 } from "react";
-
-const LS_KEY = "user-data";
+import { LS_KEY } from "@/constants";
 
 const defaultState: UserContextState = {
   name: "",
@@ -15,19 +14,19 @@ const defaultState: UserContextState = {
   password: "",
 };
 
-const currentState = (): UserContextState => {
+const currentState = (): UserContextState | null => {
   try {
     if (typeof window === "undefined") {
-      return defaultState;
+      return null;
     }
     const data = localStorage.getItem(LS_KEY);
     if (!data) {
-      return defaultState;
+      return null;
     }
     return JSON.parse(data);
   } catch (e) {
     console.error(e);
-    return defaultState;
+    return null;
   }
 };
 
@@ -38,16 +37,22 @@ export const UserContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [state, setState] = useState(currentState());
+  const [state, setState] = useState(currentState() || defaultState);
   const set = (stateDiff: Partial<UserContextState>) => {
     setState((prevState) => ({ ...prevState, ...stateDiff }));
   };
-  const save = () => {
-    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  const setSave = (stateDiff: Partial<UserContextState>) => {
+    const newState = { ...state, ...stateDiff };
+    setState(newState);
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(newState));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
-    <UserContext.Provider value={{ state, set, save }}>
+    <UserContext.Provider value={{ state, set, setSave }}>
       {children}
     </UserContext.Provider>
   );
@@ -66,7 +71,7 @@ export const useUserContext = (): UserContextType => {
 export type UserContextType = {
   state: UserContextState;
   set: (stateDiff: Partial<UserContextState>) => void;
-  save: () => void;
+  setSave: (stateDiff: Partial<UserContextState>) => void;
 };
 
 export type UserContextState = {
