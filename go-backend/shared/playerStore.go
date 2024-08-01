@@ -91,9 +91,12 @@ func (ps *playerStore) PutPlayer(token string, playerUpdates types.UpdatePlayer)
 func (ps *playerStore) DeletePlayer(token string) error {
 	ps.mu.Lock()
 	defer ps.mu.Unlock()
-	if _, ok := ps.playerData[token]; !ok {
+	var player types.Player
+	var ok bool
+	if player, ok = ps.playerData[token]; !ok {
 		return errors.New("player not found")
 	}
+	player.Websocket.Close()
 	name := ps.playerData[token].Name
 	delete(ps.playerData, token)
 	delete(ps.playerNames, name)
