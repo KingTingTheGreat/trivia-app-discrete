@@ -75,11 +75,6 @@ func UpdatePlayer(c echo.Context) error {
 		return util.UserInputError(c, "No player selected")
 	}
 
-	var name string
-	if name, ok = bodyJson["name"].(string); !ok || len(name) == 0 {
-		return util.UserInputError(c, "No player name selected")
-	}
-
 	var amountStr string
 	if amountStr, ok = bodyJson["amount"].(string); !ok {
 		return util.UserInputError(c, "No amount provided")
@@ -126,7 +121,7 @@ func DeletePlayer(c echo.Context) error {
 	}
 
 	var token string
-	if token, ok = bodyJson["token"].(string); !ok {
+	if token, ok = bodyJson["token"].(string); !ok || len(token) != 64 {
 		return util.UserInputError(c, "No player selected")
 	}
 
@@ -137,6 +132,7 @@ func DeletePlayer(c echo.Context) error {
 	shared.PlayerStore.DeletePlayer(token)
 
 	shared.PlayerListChan <- true
+	shared.LeaderboardChan <- true
 
 	return nil
 }
