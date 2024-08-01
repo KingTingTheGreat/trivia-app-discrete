@@ -13,8 +13,10 @@ export default function ControlPage() {
     {}
   );
   const [amount, setAmount] = useState("0");
-  const [name, setName] = useState("");
-  const [token, setToken] = useState("");
+  const [scoreName, setScoreName] = useState("");
+  const [scoreToken, setScoreToken] = useState("");
+  const [removeName, setRemoveName] = useState("");
+  const [removeToken, setRemoveToken] = useState("");
   const [ws, setWs] = useState(new WebSocket(WS("players")));
 
   // create websocket
@@ -37,8 +39,8 @@ export default function ControlPage() {
       console.log("disconnected from players");
       setPlayers([]);
       setAmount("0");
-      setName("");
-      setToken("");
+      setScoreName("");
+      setScoreToken("");
       // try to reconnect
       setTimeout(() => {
         setWs(new WebSocket(WS("players")));
@@ -48,9 +50,7 @@ export default function ControlPage() {
 
   return (
     <main className="flex flex-col items-center p-2">
-      <p>{name}</p>
-      <p>{token}</p>
-      <h1>Control Panel</h1>
+      <h1 className="text-4xl p-2 font-semibold m-4">Control Panel</h1>
       <div>
         <h4>Password</h4>
         <input
@@ -80,25 +80,23 @@ export default function ControlPage() {
           <h4>Update User Score</h4>
           <select
             className="border-2 border-black p-1"
-            value={name}
+            value={scoreName}
             onChange={(e) => {
               console.log(playerTokens);
               const name = e.target.value;
-              setName(name);
-              setToken(playerTokens[name]);
+              setScoreName(name);
+              setScoreToken(playerTokens[name]);
               setAmount("0");
               setErrorMessage(DEFAULT_ERROR);
             }}
           >
             <option></option>
             {players &&
-              players.map((player) => {
-                return (
-                  <option key={player[0]} value={player[0]}>
-                    {player[0]}
-                  </option>
-                );
-              })}
+              players.map((player) => (
+                <option key={player[0]} value={player[0]}>
+                  {player[0]}
+                </option>
+              ))}
           </select>
           <input
             className="border-2 border-black p-1"
@@ -110,21 +108,21 @@ export default function ControlPage() {
           />
           <button
             onClick={() => {
-              console.log(name, token);
+              console.log(scoreName, scoreToken);
               fetch(HTTP("player"), {
                 method: "PUT",
                 body: JSON.stringify({
                   password,
                   amount,
-                  token,
-                  name,
+                  token: scoreToken,
+                  name: scoreName,
                 }),
               })
                 .then((res) => res.json())
                 .then((data) => {
                   if (data.success == "false") {
                     setErrorMessage(data.message);
-                    setName("");
+                    setScoreName("");
                   }
                 })
                 .catch((err) => console.error(err));
@@ -178,9 +176,15 @@ export default function ControlPage() {
         <h4>Remove Player</h4>
         <select
           className="border-2 border-black p-1"
-          name="players"
-          id="remove-players"
+          onChange={(e) => {
+            console.log(playerTokens);
+            const name = e.target.value;
+            setRemoveName(name);
+            setRemoveToken(playerTokens[name]);
+            setErrorMessage(DEFAULT_ERROR);
+          }}
         >
+          <option></option>
           {players &&
             players.map((player) => (
               <option key={player[0]} value={player[0]}>
@@ -193,13 +197,17 @@ export default function ControlPage() {
           onClick={() =>
             fetch(HTTP("player"), {
               method: "DELETE",
-              body: JSON.stringify({ password }),
+              body: JSON.stringify({
+                password,
+                token: removeToken,
+                name: removeName,
+              }),
             })
               .then((res) => res.json())
               .then((data) => {
                 if (data.success == "false") {
                   setErrorMessage(data.message);
-                  setName("");
+                  setRemoveName("");
                 }
               })
               .catch((err) => console.error(err))
