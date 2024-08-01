@@ -29,7 +29,10 @@ func BuzzWs(c echo.Context) error {
 	// close the connection and remove websocket from player data
 	defer func(conn *websocket.Conn) {
 		shared.PlayerStore.PutPlayer(token, types.UpdatePlayer{Websocket: nil})
-		conn.Close()
+		err := conn.Close()
+		if err != nil {
+			fmt.Println("error closing connection")
+		}
 	}(conn)
 
 	// check if the token is valid
