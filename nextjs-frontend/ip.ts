@@ -1,5 +1,7 @@
 const IP: string = "host-ip-address";
 
-export const HOME = (): string => `http://${IP}:3000`;
-export const HTTP = (route: string): string => `http://${IP}:8080/${route}`;
-export const WS = (route: string): string => `ws://${IP}:8080/${route}`;
+export const HOME = (ip: string): string => `http://${ip}:3000`;
+export const HTTP = (ip: string, route: string): string =>
+  `http://${ip}:8080/${route}`;
+export const WS = (ip: string, route: string): string =>
+  `ws://${ip}:8080/${route}`;
