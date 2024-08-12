@@ -11,7 +11,7 @@ export const TableRow = ({ children, index }: { children: React.ReactNode; index
 
 export const TableData = ({ children, style }: { children: any; style?: CSSProperties }) => {
   return (
-    <td className="text-center p-2 border-2" style={style}>
+    <td className="text-center py-2 px-4 border-2 text-lg font-medium" style={style}>
       {children}
     </td>
   );
@@ -31,12 +31,12 @@ const GameContent = ({
   console.log(content.map((player, index) => mapFunc(player, index)));
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-4xl font-semibold p-2 m-1">{title}</h2>
+      <h2 className="text-5xl font-semibold p-2 m-1">{title}</h2>
       <table className="border-collapse">
         <thead>
           <tr>
             {headers.map((header, index) => (
-              <th className="p-2 border-solid border-2" key={"header: " + index}>
+              <th className="px-6 py-2 border-solid border-2 text-xl" key={"header: " + index}>
                 {header}
               </th>
             ))}
