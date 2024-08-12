@@ -56,7 +56,7 @@ func PostToken(c echo.Context) error {
 		Websocket:        nil,
 	})
 	if err != nil {
-		util.UserInputError(c, err.Error())
+		return util.UserInputError(c, err.Error())
 	}
 
 	shared.PlayerListChan <- true

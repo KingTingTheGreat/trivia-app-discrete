@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { UserContextType, useUserContext } from "@/context/UserContext";
+import { useUserContext } from "@/context/UserContext";
 import { useState } from "react";
 import { HTTP } from "@/ip";
 import { DEFAULT_ERROR } from "@/constants";
@@ -29,6 +29,7 @@ const HomeForm = () => {
           });
           router.push("/player");
         } else {
+          console.log("failure", data);
           setErrorMessage(data.message);
         }
       })
