@@ -80,6 +80,9 @@ func (ps *playerStore) PutPlayer(token string, playerUpdates types.UpdatePlayer)
 		player.BuzzedIn = *playerUpdates.BuzzedIn
 	}
 	if playerUpdates.Websocket != nil {
+		if player.Websocket != nil {
+			player.Websocket.Close()
+		}
 		player.Websocket = playerUpdates.Websocket
 	}
 	ps.playerData[token] = player
