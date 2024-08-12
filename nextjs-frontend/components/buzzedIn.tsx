@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { WS } from "@/ip";
+import GameContent, { TableRow, TableData } from "./gameContent";
 
 const BuzzedIn = () => {
   const [data, setData] = useState([]);
@@ -35,29 +36,22 @@ const BuzzedIn = () => {
     }
   }, [data]);
 
+  const buzzedInMapFunc = (player: string[], index: number): React.ReactNode => {
+    return (
+      <TableRow index={index}>
+        <TableData>{player[0]}</TableData>
+        <TableData>{player[1]}</TableData>
+      </TableRow>
+    );
+  };
+
   return (
-    <div className="flex flex-col items-center">
-      <h2>Buzzed In</h2>
-      <table className="border-collapse">
-        <thead>
-          <tr>
-            <th className="p-2 border-solid border-2">Name</th>
-            <th className="p-2 border-solid border-2">Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data &&
-            data.map((player) => {
-              return (
-                <tr className="border-2" key={player}>
-                  <td className="text-center p-2 border-2">{player[0]}</td>
-                  <td className="text-center p-2 border-2">{player[1]}</td>
-                </tr>
-              );
-            })}
-        </tbody>
-      </table>
-    </div>
+    <GameContent
+      title="Buzzed In"
+      headers={["Name", "Time"]}
+      content={data}
+      mapFunc={buzzedInMapFunc}
+    />
   );
 };
 
