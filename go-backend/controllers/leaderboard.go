@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"fmt"
 	"go-backend/shared"
+	"go-backend/types"
 	"sort"
 	"sync"
 
@@ -40,7 +40,7 @@ func Leaderboard(c echo.Context) error {
 	return nil
 }
 
-func makeLeaderboard() [][]string {
+func makeLeaderboard() []types.LeaderboardPlayer {
 	playerList := shared.PlayerStore.AllPlayers()
 
 	// sort the list by score, then last update, then name
@@ -55,9 +55,9 @@ func makeLeaderboard() [][]string {
 	})
 
 	// create a list of player names and scores
-	leaderboardList := make([][]string, 0)
+	leaderboardList := make([]types.LeaderboardPlayer, 0)
 	for _, player := range playerList {
-		leaderboardList = append(leaderboardList, []string{player.Name, fmt.Sprintf("%d", player.Score)})
+		leaderboardList = append(leaderboardList, types.LeaderboardPlayer{Name: player.Name, Score: player.Score})
 	}
 
 	return leaderboardList

@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import { WS } from "@/ip";
 import GameContent, { TableRow, TableData } from "./gameContent";
+import { Player } from "@/types";
 
 const BuzzedIn = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Player[]>([]);
   const [ws, setWs] = useState(new WebSocket(WS("buzzed-in")));
   const [buzzer, setBuzzer] = useState<HTMLAudioElement | null>(null);
 
@@ -36,11 +37,11 @@ const BuzzedIn = () => {
     }
   }, [data]);
 
-  const buzzedInMapFunc = (player: string[], index: number): React.ReactNode => {
+  const buzzedInMapFunc = (player: Player, index: number): React.ReactNode => {
     return (
       <TableRow index={index}>
-        <TableData>{player[0]}</TableData>
-        <TableData>{player[1]}</TableData>
+        <TableData>{player.Name}</TableData>
+        <TableData>{player.Time}</TableData>
       </TableRow>
     );
   };

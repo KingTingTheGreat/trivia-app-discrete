@@ -24,3 +24,13 @@ type UpdatePlayer struct {
 	BuzzedIn    *time.Time
 	Websocket   *websocket.Conn
 }
+
+type BuzzedInPlayer struct {
+	Name string
+	Time string
+}
+
+type LeaderboardPlayer struct {
+	Name  string
+	Score int
+}

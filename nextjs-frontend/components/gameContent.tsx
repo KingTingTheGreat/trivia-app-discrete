@@ -1,3 +1,4 @@
+import { Player } from "@/types";
 import { CSSProperties } from "react";
 
 export const TableRow = ({ children, index }: { children: React.ReactNode; index: number }) => {
@@ -24,8 +25,8 @@ const GameContent = ({
 }: {
   title: string;
   headers: string[];
-  content: string[][];
-  mapFunc: (row: string[], index: number) => React.ReactNode;
+  content: Player[];
+  mapFunc: (row: Player, index: number) => React.ReactNode;
 }) => {
   console.log(content.map((player, index) => mapFunc(player, index)));
   return (
@@ -35,7 +36,7 @@ const GameContent = ({
         <thead>
           <tr>
             {headers.map((header, index) => (
-              <th className="p-2 border-solid border-2" key={index}>
+              <th className="p-2 border-solid border-2" key={"header: " + index}>
                 {header}
               </th>
             ))}

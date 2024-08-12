@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"go-backend/shared"
+	"go-backend/types"
 	"sort"
 	"sync"
 
@@ -40,7 +41,7 @@ func BuzzedIn(c echo.Context) error {
 	return nil
 }
 
-func makeBuzzedIn() [][]string {
+func makeBuzzedIn() []types.BuzzedInPlayer {
 	playerList := shared.PlayerStore.AllPlayers()
 
 	// sort the list by buzz in time, then score, then name
@@ -55,13 +56,13 @@ func makeBuzzedIn() [][]string {
 	})
 
 	// create a list of player names and buzz in times
-	buzzedInList := make([][]string, 0)
+	buzzedInList := make([]types.BuzzedInPlayer, 0)
 	for _, player := range playerList {
 		// filter out players who haven't buzzed in
 		if player.BuzzedIn.IsZero() {
 			continue
 		}
-		buzzedInList = append(buzzedInList, []string{player.Name, player.BuzzedIn.Format("03:04:05.000 PM")})
+		buzzedInList = append(buzzedInList, types.BuzzedInPlayer{Name: player.Name, Time: player.BuzzedIn.Format("03:04:05.000 PM")})
 	}
 
 	return buzzedInList
