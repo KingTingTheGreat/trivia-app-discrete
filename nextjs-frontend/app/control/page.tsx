@@ -9,9 +9,7 @@ export default function ControlPage() {
   const [errorMessage, setErrorMessage] = useState(DEFAULT_ERROR);
   const [qnum, setQnum] = useState(0);
   const [players, setPlayers] = useState<string[]>([]);
-  const [playerTokens, setPlayerTokens] = useState<{ [name: string]: string }>(
-    {}
-  );
+  const [playerTokens, setPlayerTokens] = useState<{ [name: string]: string }>({});
   const [amount, setAmount] = useState("0");
   const [scoreName, setScoreName] = useState("");
   const [scoreToken, setScoreToken] = useState("");

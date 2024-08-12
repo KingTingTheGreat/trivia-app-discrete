@@ -1,10 +1,4 @@
-import {
-  Dispatch,
-  SetStateAction,
-  createContext,
-  useContext,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, createContext, useContext, useState } from "react";
 import { LS_KEY } from "@/constants";
 
 const defaultState: UserContextState = {
@@ -32,11 +26,7 @@ const currentState = (): UserContextState | null => {
 
 const UserContext = createContext<UserContextType | null>(null);
 
-export const UserContextProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, setState] = useState(currentState() || defaultState);
   const set = (stateDiff: Partial<UserContextState>) => {
     setState((prevState) => ({ ...prevState, ...stateDiff }));
@@ -51,19 +41,13 @@ export const UserContextProvider = ({
     }
   };
 
-  return (
-    <UserContext.Provider value={{ state, set, setSave }}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={{ state, set, setSave }}>{children}</UserContext.Provider>;
 };
 
 export const useUserContext = (): UserContextType => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error(
-      "usePlayerContext must be used within a PlayerContextProvider"
-    );
+    throw new Error("usePlayerContext must be used within a PlayerContextProvider");
   }
   return context;
 };
