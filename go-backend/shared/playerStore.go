@@ -133,12 +133,20 @@ func (ps *playerStore) AllTokenPlayers() []TokenPlayer {
 	return allPlayers
 }
 
+type PlayerNameToken struct {
+	Name string 
+	Token string
+}
+
 // returns a list of all player names and their corresponding tokens
-func (ps *playerStore) AllNamesTokens() [][]string {
-	var allNamesTokens [][]string
+func (ps *playerStore) AllNamesTokens() []PlayerNameToken {
+	var allNamesTokens []PlayerNameToken
 	ps.mu.RLock()
 	for name, token := range ps.playerNames {
-		allNamesTokens = append(allNamesTokens, []string{name, token})
+		allNamesTokens = append(allNamesTokens, PlayerNameToken{
+			Name:name, 
+			Token: token,
+		})
 	}
 	ps.mu.RUnlock()
 	return allNamesTokens
